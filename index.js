@@ -17,14 +17,14 @@ function getAlumnos(){
     return JSON.parse(content).koders
 }
 function eliminar(nombre){
-    const arrayAlumnos = getAlumnos()
-    for(let i=0;i<arrayAlumnos.length;i++){
-        const comparativo=arrayAlumnos[i]
-        if(nombre===comparativo){
-            arrayAlumnos.splice(i, 1)
-        }
+    const arrayAlumnos = getAlumnos();
+    const index = arrayAlumnos.findIndex(koder => koder.name === nombre);
+    if (index !== -1) {
+        arrayAlumnos.splice(index, 1);
+        updateAlumnos(arrayAlumnos);
+        return true;
     }
-    updateAlumnos(arrayAlumnos)
+    return false;
 }
 server.get('/koders', (request, response)=> {
     const arrayAlumnos = getAlumnos()
@@ -78,7 +78,7 @@ server.post('/koders', (request, response)=> {
         })
         return
     }
-    response.status(400)
+    response.status(200)
     arrayAlumnos.push(newKoder)
     updateAlumnos(arrayAlumnos)
     response.json({
@@ -87,13 +87,20 @@ server.post('/koders', (request, response)=> {
     })
 })
 server.delete('/koders/:name', (request, response)=> {
-    const arrayAlumnos = getAlumnos()  
-    const KoderName =request.params.name
-    eliminar(KoderName)
-    response.json({
-        message: "Student deleted successfully",
-        koders: arrayAlumnos
-    })
+    const KoderName = request.params.name;
+    const deleted = eliminar(KoderName);
+
+    if (deleted) {
+        const updatedAlumnos = getAlumnos();
+        response.status(200).json({
+            message: "Student deleted successfully",
+            koders: updatedAlumnos
+        });
+    } else {
+        response.status(404).json({
+            message: "Student not found"
+        });
+    }
 })
 server.delete('/koders', (request, response)=> {
     updateAlumnos([])
