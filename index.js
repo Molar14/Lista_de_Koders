@@ -1,19 +1,19 @@
 const fs = require('node:fs')
 const express =require("express")
 const server = express()
-const lista = "koders.json"
-const fileExist = fs.existsSync(lista)
+const dbName = "koders.json"
+const fileExist = fs.existsSync(dbName)
 server.use(express.json())
 if(!fileExist){
-    fs.writeFileSync(lista, JSON.stringify({koders:[]}))
+    fs.writeFileSync(dbName, JSON.stringify({koders:[]}))
 }
 function updateAlumnos(koders){
     const newkoders = {koders: koders}
     const newkodersAsString = JSON.stringify(newkoders)
-    fs.writeFileSync(lista,newkodersAsString)
+    fs.writeFileSync(dbName,newkodersAsString)
 }
 function getAlumnos(){
-    const content =fs.readFileSync(lista,"utf8")
+    const content =fs.readFileSync(dbName,"utf8")
     return JSON.parse(content).koders
 }
 function eliminar(nombre){
@@ -28,19 +28,13 @@ function eliminar(nombre){
 }
 server.get('/koders', (request, response)=> {
     const arrayAlumnos = getAlumnos()
-    if (!arrayAlumnos.length){
-        response.status(400)
-        response.json({
-            message: "Vacio"
-        })
-    }else{
-        response.status(400)
-        response.json({
-            message: "all koders",
-            koders: arrayAlumnos
+    response.status(200)
+    response.json({
+        message: "all koders",
+        koders: arrayAlumnos
         })
     }
-})
+)
 server.post('/koders', (request, response)=> {
     const arrayAlumnos = getAlumnos()   
     const newKoder =  request.body
